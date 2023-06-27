@@ -10,6 +10,7 @@
 
     <div class="clock">
       <div class="clock-face">
+        <div class="center-dot"></div>
         <div class="hand hour-hand"></div>
         <div class="hand min-hand"></div>
         <div class="hand second-hand"></div>
@@ -57,19 +58,113 @@
       transform: translateY(-3px); /* account for the height of the clock hands */
     }
 
+    .center-dot {
+      width: 10px;
+      height: 10px;
+      background-color: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 49%;
+      left: 48%;
+      z-index: 1;
+    }
+
     .hand {
       width: 50%;
-      height: 6px;
-      background: black;
       position: absolute;
       top: 50%;
+      transform-origin: 100%;
+      border-radius: 50%;
+    }
+    
+    .hand.second-hand {
+      height: 1px;
+      background-color: red;
+      top: 50.2%;
+    }
+    
+    .hand.min-hand {
+      background-color: aquamarine;
+      height: 3px;
+    }
+    
+    .hand.hour-hand {
+      background: black;
+      height: 6px;
     }
 
   </style>
 
-  <script>
+<script>
+  let currentPosition = {
+    hour: 0,
+    minute: 0,
+  }
+  setInterval(setTime, 1000);
 
+  function setTime() {
+      const date = new Date();
+      
+      const seconds = date.getSeconds();
+      let secondsInDegrees = seconds / 60 * 360 + 90;
+      secondsInDegrees = (secondsInDegrees === 90)? 450: secondsInDegrees;
+      
+      const secondHand = document.querySelector(".second-hand");
+      secondHand.style["transition"] = "transform 0.05s ease-in";
+      secondHand.style["transform"] = `rotate(${secondsInDegrees}deg)`;
+      
+      secondHand.addEventListener("transitionend", () => {
+        if (secondsInDegrees === 450) {
+          secondHand.style["transition"] = "none";
+          secondHand.style["transform"] = "rotate(90deg)";
+        }
+        
+      }, {
+        once: true,
+      });
 
+      const minutes = date.getMinutes();
+      let minutesInDegrees = minutes / 60 * 360 + 90;
+      minutesInDegrees =  (minutesInDegrees === 90)? 450: minutesInDegrees;
+
+      const minuteHand = document.querySelector(".min-hand");
+
+      if (currentPosition.minute !== minutesInDegrees) {
+        minuteHand.style["transition"] = "transform 0.15s ease-in";
+        minuteHand.style["transform"] = `rotate(${minutesInDegrees}deg)`;
+        currentPosition.minute = minutesInDegrees;
+        
+        minuteHand.addEventListener("transitionend", () => {
+          if (minutesInDegrees === 450) {
+            minuteHand.style["transition"] = "none";
+            minuteHand.style["transform"] = "rotate(90deg)";
+          }
+        }, {
+          once: true,
+        });
+      }
+
+      const hours = date.getHours();
+      let hoursInDegrees = hours / 12 * 360 + 90;
+      hoursInDegrees =  (hoursInDegrees === 90)? 810: hoursInDegrees;
+      
+      const hourHand = document.querySelector(".hour-hand");
+      
+      if (currentPosition.hour === hoursInDegrees) return;
+      hourHand.style["transition"] = "transform 0.25s ease-in";
+      hourHand.style["transform"] = `rotate(${hoursInDegrees}deg)`;
+      currentPosition.hour = hoursInDegrees;
+    
+      hourHand.addEventListener("transitionend", () => {
+        if (hoursInDegrees === 450 || hoursInDegrees === 810) {
+          hourHand.style["transition"] = "none";
+          hourHand.style["transform"] = "rotate(90deg)";
+        }
+      }, {
+        once: true,
+      });
+      
+    }
   </script>
 </body>
 </html>
